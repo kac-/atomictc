@@ -114,7 +114,7 @@ public class AtomicTests {
 					r.nextBytes(txid);
 					double amount = r
 							.nextDouble() * 5;
-					l.add(new Unspent(new Bytes(txid), (long) r.nextInt(5), addr.toString(), new Bytes(scriptPubKey),
+					l.add(new Unspent(new Bytes(txid), r.nextInt(5), addr.toString(), new Bytes(scriptPubKey),
 							amount));
 					sum += amount;
 				}
