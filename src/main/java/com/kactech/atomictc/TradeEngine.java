@@ -11,15 +11,15 @@ import com.google.bitcoin.core.ProtocolException;
 import com.google.bitcoin.core.ScriptException;
 import com.google.bitcoin.core.Sha256Hash;
 import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.Transaction.SigHash;
 import com.google.bitcoin.core.TransactionInput;
 import com.google.bitcoin.core.TransactionOutPoint;
 import com.google.bitcoin.core.TransactionOutput;
 import com.google.bitcoin.core.Utils;
-import com.google.bitcoin.core.Transaction.SigHash;
 import com.google.bitcoin.crypto.TransactionSignature;
 import com.google.bitcoin.script.Script;
 import com.google.bitcoin.script.ScriptBuilder;
-import com.kactech.atomictc.AtomicRpcTests;
+import com.google.bitcoin.script.ScriptOpCodes;
 import com.kactech.atomictc.TradeState.Bytes;
 import com.kactech.atomictc.TradeState.Unspent;
 
@@ -76,7 +76,7 @@ public class TradeEngine {
 						new Sha256Hash(ru.txid.b))));
 
 			tx1.addOutput(new TransactionOutput(net.params, tx1, sum.subtract(ts.fee).subtract(ts.change),
-					AtomicRpcTests.makeCrossScript(ts.pubKey.b, ts.his.pubKey.b, ts.hx.b)
+					makeCrossScript(ts.pubKey.b, ts.his.pubKey.b, ts.hx.b)
 							.getProgram()));
 
 			if (ts.change.compareTo(BigInteger.ZERO) > 0)
@@ -221,7 +221,7 @@ public class TradeEngine {
 		Transaction ref = createRefundTx(net.params, ts.his.refundAmount, ts.his.pubKey.b, ts.his.lockTime,
 				ts.his.bailInHash.b);
 
-		Script scrPubKey = AtomicRpcTests.makeCrossScript(ts.his.pubKey.b, ts.pubKey.b, ts.hx.b);
+		Script scrPubKey = makeCrossScript(ts.his.pubKey.b, ts.pubKey.b, ts.hx.b);
 		TransactionSignature sig = ref.calculateSignature(0, ks.getKeys(Utils.sha256hash160(ts.pubKey.b))[0],
 				scrPubKey, SigHash.ALL, false);
 		ts.sigHisRefund = new Bytes(sig.encodeToBitcoin());
@@ -277,4 +277,17 @@ public class TradeEngine {
 						.smallNum(1).build());
 		refund.getInput(0).getScriptSig().correctlySpends(refund, 0, bailIn.getOutput(0).getScriptPubKey(), false);
 	}
+
+	public static Script makeCrossScript(byte[] keyA, byte[] keyB, byte[] hx) {
+		return new ScriptBuilder()
+				.op(ScriptOpCodes.OP_IF)//if 
+				.smallNum(2).data(keyA).data(keyB)
+				.smallNum(2).op(ScriptOpCodes.OP_CHECKMULTISIG)
+				.op(ScriptOpCodes.OP_ELSE)//else
+				.op(ScriptOpCodes.OP_HASH160).data(hx).op(ScriptOpCodes.OP_EQUAL)
+				.data(keyB).op(ScriptOpCodes.OP_CHECKSIG)
+				.op(ScriptOpCodes.OP_ENDIF)
+				.build();
+	}
+
 }
