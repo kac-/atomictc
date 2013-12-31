@@ -123,9 +123,8 @@ public class AtomicTests {
 				// amount we want to send to Alice in this trade (2/3 of input amount)
 				tsB.amount = BigInteger.valueOf(Math.round(Math.floor(sum * netB.base * 2 / 3)));
 			}
-			// refund lockTime to half of time left for Alice's refund   
-			long lt = System.currentTimeMillis() / 1000l;
-			tsB.lockTime = lt + (lt - tsB.his.lockTime) / 2;
+			// 24h lock time
+			tsB.lockTime = System.currentTimeMillis() / 1000l + 60 * 60 * 24;
 
 			// now the engine can create bail in refund for Bob
 			eB.createBailIn(tsB);
