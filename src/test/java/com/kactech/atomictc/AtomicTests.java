@@ -77,7 +77,7 @@ public class AtomicTests {
 			// amount of XPM to exchange
 			tsA.amount = BigInteger.valueOf(availableFundsA * 2 / 3);
 			// 48h lock time
-			tsA.lockTime = System.currentTimeMillis() / 1000l + 60 * 60 * 24;
+			tsA.lockTime = System.currentTimeMillis() / 1000l + 60 * 60 * 48;
 
 			// create bail in and refund transactions
 			eA.createBailIn(tsA);
@@ -123,9 +123,9 @@ public class AtomicTests {
 				// amount we want to send to Alice in this trade (2/3 of input amount)
 				tsB.amount = BigInteger.valueOf(Math.round(Math.floor(sum * netB.base * 2 / 3)));
 			}
-			// refund lockTime to twice time left for Alice to refund   
+			// refund lockTime to half of time left for Alice's refund   
 			long lt = System.currentTimeMillis() / 1000l;
-			tsB.lockTime = lt + (lt - tsB.his.lockTime) * 2;
+			tsB.lockTime = lt + (lt - tsB.his.lockTime) / 2;
 
 			// now the engine can create bail in refund for Bob
 			eB.createBailIn(tsB);
